@@ -408,6 +408,53 @@
         });
     </script>
     
-    <a href="page2.html"><button type="button">Next Page</button></a>
+<style>
+    .ball-btn {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: #fff;
+      font-size: 28px;
+      font-weight: bold;
+
+      /* 3D ball effect */
+      background: radial-gradient(circle at 30% 30%, #8ab4ff, #3b5bdb 50%, #1b2a6b 100%);
+      box-shadow:
+        inset -6px -6px 12px rgba(0, 0, 0, 0.4),
+        inset 4px 4px 10px rgba(255, 255, 255, 0.5),
+        0 10px 20px rgba(0, 0, 0, 0.4);
+
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .ball-btn:hover {
+      transform: translateY(-5px) scale(1.08);
+      box-shadow:
+        inset -6px -6px 12px rgba(0, 0, 0, 0.4),
+        inset 4px 4px 10px rgba(255, 255, 255, 0.5),
+        0 16px 26px rgba(0, 0, 0, 0.45);
+    }
+
+    .ball-btn:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Welcome to my website</h1>
+  <p>Some text here...</p>
+
+  <!-- 3D ball button -->
+  <a href="page2.html" class="ball-btn" title="Next Page">➜</a>
+
+</body>
 </body>
 </html>
