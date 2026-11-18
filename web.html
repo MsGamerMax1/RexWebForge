@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nano Banana | Future of Freshness</title>
+    
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        brand: { mango: '#FFB74D', chocolate: '#8D6E63', pomegranate: '#E57373' }
+                    },
+                    animation: {
+                        blob: "blob 7s infinite",
+                    },
+                    keyframes: {
+                        blob: {
+                            "0%": { transform: "translate(0px, 0px) scale(1)" },
+                            "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+                            "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+                            "100%": { transform: "translate(0px, 0px) scale(1)" }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+            cursor: none; /* Hide default cursor for custom effect */
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FFB74D; }
+        
+        ::selection { background: #f97316; color: white; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            opacity: 0.6;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Custom Cursor Elements */
+        #cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: 8px; height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s;
+        }
+        #cursor-follower {
+            position: fixed;
+            top: 0; left: 0;
+            width: 32px; height: 32px;
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            transition: top 0.1s ease-out, left 0.1s ease-out, width 0.2s, height 0.2s, background-color 0.2s;
+        }
+        
+        /* Animation delays for hero blobs */
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+
+        /* Toast Notification */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            right: -300px;
+            background: #22c55e;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 10000;
+            transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        #toast.show { right: 20px; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Custom Cursor -->
+    <div id="cursor"></div>
+    <div id="cursor-follower"></div>
+
+    <!-- Toast Notification -->
+    <div id="toast">Item added to cart!</div>
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 top-0 transition-all duration-300 glass-panel border-b-0">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-pink-500 cursor-pointer hover-target">
+                NANO BANANA
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="music-toggle" class="hover-target text-white/50 hover:text-white transition-colors" title="Toggle Music">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                </button>
+                <button onclick="document.getElementById('products').scrollIntoView({behavior: 'smooth'})" class="hover-target bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md text-white px-6 py-2 rounded-full font-semibold transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(255,183,77,0.4)] interactive-btn">
+                    Order Now
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative h-screen flex items-center justify-center overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#0a0a0a] z-10"></div>
+        
+        <!-- Hero Background Effects (Fills the blank space) -->
+        <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-orange-500/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob z-0"></div>
+        <div class="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob animation-delay-2000 z-0"></div>
+        <div class="absolute -bottom-8 left-1/2 w-80 h-80 bg-yellow-500/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob animation-delay-4000 z-0"></div>
+
+        <div class="z-20 text-center px-4">
+            <h1 class="text-6xl md:text-8xl font-black mb-6 tracking-tight hero-text opacity-0 translate-y-10">
+                Taste the <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-500 to-amber-600">Future of Freshness.</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-400 font-light max-w-2xl mx-auto mb-10 hero-text opacity-0 translate-y-10">
+                Cold-pressed, HPP treated, and bottled at the peak of perfection. No preservatives. Just pure, unadulterated nature.
+            </p>
+            <div class="hero-text opacity-0 translate-y-10">
+                <p class="text-sm tracking-widest uppercase text-gray-500 animate-pulse mb-4">Scroll to Experience</p>
+                <div class="w-[2px] h-16 bg-gradient-to-b from-orange-500 to-transparent mx-auto"></div>
+            </div>
+        </div>
+    </header>
+
+    <div id="products">
+        <!-- Scrollytelling Section 1: Mango -->
+        <section class="relative min-h-[150vh] product-section">
+            <div class="sticky top-0 h-screen w-full overflow-hidden">
+                <video src="Sequence_Cinematic_product_as.mp4" autoplay loop muted playsinline class="video-container"></video>
+                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-[#0a0a0a] z-10"></div>
+                
+                <div class="relative z-20 h-full flex flex-col justify-center max-w-7xl mx-auto px-6">
+                    <div class="glass-panel p-10 rounded-3xl max-w-lg transform -translate-x-full opacity-0 content-card">
+                        <h2 class="text-5xl font-extrabold text-brand-mango mb-2">Cream Mango.</h2>
+                        <h3 class="text-2xl font-light mb-6 text-white/80">Pure sunshine.</h3>
+                        <p class="text-lg text-gray-300 mb-6">Hand-picked Alphonso mangoes, perfectly ripened under the summer sun. Cold-pressed within hours of harvest to preserve every drop of nutrient-rich goodness.</p>
+                        <div class="flex gap-4 mb-8">
+                            <div class="bg-white/5 rounded-xl p-4 text-center flex-1 border border-white/10 hover:bg-white/10 transition-colors">
+                                <div class="text-2xl font-bold text-brand-mango">0g</div>
+                                <div class="text-xs text-gray-400 uppercase tracking-wider">Added Sugar</div>
+                            </div>
+                            <div class="bg-white/5 rounded-xl p-4 text-center flex-1 border border-white/10 hover:bg-white/10 transition-colors">
+                                <div class="text-2xl font-bold text-brand-mango">100%</div>
+                                <div class="text-xs text-gray-400 uppercase tracking-wider">Fruit Pulp</div>
+                            </div>
+                        </div>
+                        <button class="hover-target interactive-btn w-full bg-brand-mango/20 hover:bg-brand-mango/40 border border-brand-mango/50 text-white py-3 rounded-xl font-semibold transition-all">
+                            Add to Cart - ₹120
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scrollytelling Section 2: Chocolate -->
+        <section class="relative min-h-[150vh] product-section mt-32">
+            <div class="sticky top-0 h-screen w-full overflow-hidden">
+                <video src="Sequence_Cinematic_product_as (2).mp4" autoplay loop muted playsinline class="video-container"></video>
+                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-[#0a0a0a] z-10"></div>
+                
+                <div class="relative z-20 h-full flex flex-col justify-center items-end max-w-7xl mx-auto px-6">
+                    <div class="glass-panel p-10 rounded-3xl max-w-lg transform translate-x-full opacity-0 content-card">
+                        <h2 class="text-5xl font-extrabold text-brand-chocolate mb-2">Dutch Chocolate.</h2>
+                        <h3 class="text-2xl font-light mb-6 text-white/80">Velvety smooth.</h3>
+                        <p class="text-lg text-gray-300 mb-6">Rich, dark cocoa blended with creamy almond milk for a guilt-free treat. Loaded with natural plant protein to fuel your active lifestyle.</p>
+                        <div class="flex gap-4 mb-8">
+                            <div class="bg-white/5 rounded-xl p-4 text-center flex-1 border border-white/10 hover:bg-white/10 transition-colors">
+                                <div class="text-2xl font-bold text-brand-chocolate">12g</div>
+                                <div class="text-xs text-gray-400 uppercase tracking-wider">Plant Protein</div>
+                            </div>
+                            <div class="bg-white/5 rounded-xl p-4 text-center flex-1 border border-white/10 hover:bg-white/10 transition-colors">
+                                <div class="text-2xl font-bold text-brand-chocolate">0%</div>
+                                <div class="text-xs text-gray-400 uppercase tracking-wider">Dairy</div>
+                            </div>
+                        </div>
+                        <button class="hover-target interactive-btn w-full bg-brand-chocolate/40 hover:bg-brand-chocolate/60 border border-brand-chocolate/50 text-white py-3 rounded-xl font-semibold transition-all">
+                            Add to Cart - ₹140
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scrollytelling Section 3: Pomegranate -->
+        <section class="relative min-h-[150vh] product-section mt-32">
+            <div class="sticky top-0 h-screen w-full overflow-hidden">
+                <video src="Sequence_Cinematic_product_as (1).mp4" autoplay loop muted playsinline class="video-container"></video>
+                <div class="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-[#0a0a0a] z-10"></div>
+                
+                <div class="relative z-20 h-full flex flex-col justify-center max-w-7xl mx-auto px-6">
+                    <div class="glass-panel p-10 rounded-3xl max-w-lg transform -translate-x-full opacity-0 content-card">
+                        <h2 class="text-5xl font-extrabold text-brand-pomegranate mb-2">Ruby Pomegranate.</h2>
+                        <h3 class="text-2xl font-light mb-6 text-white/80">Antioxidant powerhouse.</h3>
+                        <p class="text-lg text-gray-300 mb-6">Each bottle contains the juice of over 1 kg of premium pomegranates. A sweet, complex flavor profile that protects and rejuvenates your body.</p>
+                        <div class="flex gap-4 mb-8">
+                            <div class="bg-white/5 rounded-xl p-4 text-center flex-1 border border-white/10 hover:bg-white/10 transition-colors">
+                                <div class="text-2xl font-bold text-brand-pomegranate">A,C,K</div>
+                                <div class="text-xs text-gray-400 uppercase tracking-wider">Vitamins</div>
+                            </div>
+                            <div class="bg-white/5 rounded-xl p-4 text-center flex-1 border border-white/10 hover:bg-white/10 transition-colors">
+                                <div class="text-2xl font-bold text-brand-pomegranate">100%</div>
+                                <div class="text-xs text-gray-400 uppercase tracking-wider">Purity</div>
+                            </div>
+                        </div>
+                        <button class="hover-target interactive-btn w-full bg-brand-pomegranate/20 hover:bg-brand-pomegranate/40 border border-brand-pomegranate/50 text-white py-3 rounded-xl font-semibold transition-all">
+                            Add to Cart - ₹150
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-[#050505] border-t border-white/10 pt-20 pb-10 mt-20 relative z-30">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-10">
+            <div class="col-span-1 md:col-span-2">
+                <div class="text-3xl font-extrabold tracking-tighter mb-4 text-white">NANO BANANA</div>
+                <p class="text-gray-500 max-w-sm">Redefining juice through technology, transparency, and uncompromising quality. Nature's best, preserved for you.</p>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4 text-white">Shop</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li class="hover-target hover:text-brand-mango cursor-pointer transition-colors">Cream Mango</li>
+                    <li class="hover-target hover:text-brand-chocolate cursor-pointer transition-colors">Dutch Chocolate</li>
+                    <li class="hover-target hover:text-brand-pomegranate cursor-pointer transition-colors">Ruby Pomegranate</li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4 text-white">Legal</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li class="hover-target hover:text-white cursor-pointer transition-colors">Privacy Policy</li>
+                    <li class="hover-target hover:text-white cursor-pointer transition-colors">Terms of Service</li>
+                    <li class="hover-target hover:text-white cursor-pointer transition-colors">Return Policy</li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 mt-16 text-center text-gray-600 text-sm">
+            &copy; 2026 Nano Banana Inc. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Audio and Script Logic -->
+    <script>
+        // Setup Audio
+        const clickSfx = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+        clickSfx.volume = 0.5;
+        
+        const bgMusic = new Audio('https://assets.mixkit.co/active_storage/sfx/135/135-preview.mp3'); // Lo-fi/Ambient beat
+        bgMusic.loop = true;
+        bgMusic.volume = 0.2;
+        let isMusicPlaying = false;
+
+        // Music Toggle Logic
+        document.getElementById('music-toggle').addEventListener('click', (e) => {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                e.currentTarget.classList.replace('text-white', 'text-white/50');
+            } else {
+                bgMusic.play().catch(err => console.log("Audio play blocked by browser", err));
+                e.currentTarget.classList.replace('text-white/50', 'text-white');
+            }
+            isMusicPlaying = !isMusicPlaying;
+        });
+
+        // Add to Cart Button Logic
+        const toast = document.getElementById('toast');
+        document.querySelectorAll('.interactive-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Play click sound
+                clickSfx.currentTime = 0;
+                clickSfx.play().catch(() => {}); // Catch needed for strict autoplay policies
+                
+                // If it's an "Add to Cart" button (contains ₹)
+                if(e.target.innerText.includes('₹')) {
+                    toast.classList.add('show');
+                    setTimeout(() => toast.classList.remove('show'), 3000);
+                }
+            });
+        });
+
+        // Custom Cursor Logic
+        const cursor = document.getElementById('cursor');
+        const cursorFollower = document.getElementById('cursor-follower');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            
+            cursorFollower.style.left = e.clientX + 'px';
+            cursorFollower.style.top = e.clientY + 'px';
+        });
+
+        // Add hover effect to interactive elements
+        document.querySelectorAll('.hover-target').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'translate(-50%, -50%) scale(2)';
+                cursorFollower.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                cursorFollower.style.transform = 'translate(-50%, -50%) scale(1.5)';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+                cursorFollower.style.backgroundColor = 'transparent';
+                cursorFollower.style.transform = 'translate(-50%, -50%) scale(1)';
+            });
+        });
+
+        // GSAP Animations
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Hero Intro Animation
+        gsap.to(".hero-text", {
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            stagger: 0.2,
+            ease: "power3.out",
+            delay: 0.2
+        });
+
+        // Scrollytelling Panels Animation
+        const sections = document.querySelectorAll('.product-section');
+        sections.forEach((section, index) => {
+            const card = section.querySelector('.content-card');
+            const video = section.querySelector('video');
+            
+            ScrollTrigger.create({
+                trigger: section,
+                start: "top center",
+                end: "bottom center",
+                onEnter: () => gsap.to(video, {opacity: 1, duration: 0.5}),
+                onLeave: () => gsap.to(video, {opacity: 0.3, duration: 0.5}),
+                onEnterBack: () => gsap.to(video, {opacity: 1, duration: 0.5}),
+                onLeaveBack: () => gsap.to(video, {opacity: 0.3, duration: 0.5}),
+            });
+
+            gsap.to(card, {
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 40%", 
+                    end: "top 10%",
+                    scrub: 1, 
+                },
+                x: 0,
+                opacity: 1,
+                ease: "power2.out"
+            });
+            
+            gsap.to(card, {
+                scrollTrigger: {
+                    trigger: section,
+                    start: "bottom 80%",
+                    end: "bottom 50%",
+                    scrub: 1,
+                },
+                y: -50,
+                opacity: 0,
+                ease: "power2.in"
+            });
+        });
+    </script>
+</body>
+</html>
